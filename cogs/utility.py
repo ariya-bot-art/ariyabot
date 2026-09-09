@@ -301,7 +301,98 @@ Conversation:
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label="Add Ariya to Server 🤖", url=invite_url, style=discord.ButtonStyle.link))
         
-        await interaction.response.send_message(embed=embed, view=view)
+    # ==================== AUTOMATIC SERVER SETUP ====================
+    @app_commands.command(name="setup_server", description="Automatically build a professional Bot Support server layout! 🏗️")
+    @app_commands.default_permissions(administrator=True)
+    async def setup_server(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        guild = interaction.guild
+
+        # 1. Information Category
+        info_cat = await guild.create_category("📌 INFORMATION & LINKS")
+        welcome_ch = await info_cat.create_text_channel("welcome")
+        announce_ch = await info_cat.create_text_channel("announcements")
+        privacy_ch = await info_cat.create_text_channel("privacy-policy")
+        faq_ch = await info_cat.create_text_channel("faq-and-commands")
+        status_ch = await info_cat.create_text_channel("bot-status")
+
+        # 2. Community Category
+        comm_cat = await guild.create_category("💬 COMMUNITY & LOUNGE")
+        await comm_cat.create_text_channel("general-chat")
+        await comm_cat.create_text_channel("bot-commands")
+        await comm_cat.create_text_channel("suggestions")
+
+        # 3. Support Category
+        supp_cat = await guild.create_category("🛠️ SUPPORT & TICKETS")
+        await supp_cat.create_text_channel("support-tickets")
+        await supp_cat.create_text_channel("bug-reports")
+
+        # 4. VIP Category
+        vip_cat = await guild.create_category("👑 VIP & VOTERS")
+        await vip_cat.create_text_channel("voter-perks")
+
+        # Save welcome channel to config
+        config = load_data("config.json")
+        config["welcome_channel"] = welcome_ch.id
+        save_data("config.json", config)
+
+        # Post Welcome Embed
+        welcome_embed = discord.Embed(
+            title="👋 Welcome to the Official Ariya Support Server!",
+            description="Ariya is your all-in-one **Gemini AI companion** for Discord with Music, Economy, Daily Challenges, Fun & Moderation!\n\n"
+                        f"📌 **Quick Links**\n"
+                        f"📜 **Privacy Policy:** <#{privacy_ch.id}>\n"
+                        f"❓ **Commands List:** <#{faq_ch.id}>\n"
+                        f"📡 **Bot Status:** <#{status_ch.id}>\n\n"
+                        "Enjoy your stay and happy chatting! 🚀",
+            color=discord.Color.purple()
+        )
+        if self.bot.user and self.bot.user.display_avatar:
+            welcome_embed.set_thumbnail(url=self.bot.user.display_avatar.url)
+        await welcome_ch.send(embed=welcome_embed)
+
+        # Post Privacy Policy Embed
+        privacy_embed = discord.Embed(
+            title="📜 Privacy Policy for Ariya Discord Bot",
+            description="*Effective Date: September 9, 2026*\n\n"
+                        "### 1. Data We Collect & Store\n"
+                        "• **User & Guild IDs:** To save user balances & preferences.\n"
+                        "• **Economy Data:** Coin balances (`/balance`, `/give`).\n"
+                        "• **Moderation History:** Warning records (`/warn`).\n"
+                        "• **Challenge Data:** Leaderboard ranks (`/challenge`).\n"
+                        "• **AI Chat Context:** Temporary prompt memory (`/chat`).\n\n"
+                        "### 2. Privacy & Usage\n"
+                        "Data is stored securely, used strictly for bot features, and **never sold** or shared.",
+            color=discord.Color.blue()
+        )
+        await privacy_ch.send(embed=privacy_embed)
+
+        # Post FAQ Embed
+        faq_embed = discord.Embed(
+            title="❓ Ariya Commands & FAQ Guide",
+            description="Use `/help` anywhere to view all available commands!\n\n"
+                        "🤖 **AI:** `/chat`, `/clearchat`, `/vibe`\n"
+                        "🎵 **Music:** `/play`, `/pause`, `/resume`, `/skip`, `/stop`, `/queue`, `/leave`\n"
+                        "😂 **Fun:** `/ship`, `/drama`, `/roast`, `/trivia`, `/8ball`, `/meme`, `/confess`\n"
+                        "🎯 **Daily:** `/challenge`, `/complete`, `/leaderboard`, `/balance`\n"
+                        "🛠️ **Utility:** `/schedule`, `/newspaper`, `/summarize`, `/poll`, `/give`, `/userinfo`, `/serverinfo`, `/botinfo`, `/ping`, `/invite`, `/setup_server`\n"
+                        "🔨 **Moderation:** `/kick`, `/ban`, `/mute`, `/warn`, `/purge`, `/lock`, `/slowmode`, `/setwelcome`",
+            color=discord.Color.gold()
+        )
+        await faq_ch.send(embed=faq_embed)
+
+        # Post Status Embed
+        status_embed = discord.Embed(
+            title="📡 Ariya Operational Status",
+            description=f"**Status:** `🟢 Operational 24/7`\n"
+                        f"**Latency:** `{round(self.bot.latency * 1000)}ms`\n"
+                        f"**Hosting:** `Railway Cloud`\n"
+                        f"**AI Engine:** `Google Gemini 2.5 Flash`",
+            color=discord.Color.green()
+        )
+        await status_ch.send(embed=status_embed)
+
+        await interaction.followup.send("🎉 **Server Setup Complete!** Ariya created all categories, channels, and posted official info embeds!")
 
 
 async def setup(bot):
