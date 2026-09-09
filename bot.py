@@ -28,7 +28,8 @@ class AriyaBot(commands.Bot):
         synced = await self.tree.sync()
         print(f"✅ Synced {len(synced)} slash commands globally!", flush=True)
 
-bot = AriyaBot(command_prefix="!", intents=intents)
+# Support both ! and . prefixes for commands like .v limit, .v trust, .v lock
+bot = AriyaBot(command_prefix=commands.when_mentioned_or("!", "."), intents=intents)
 
 @bot.event
 async def on_ready():

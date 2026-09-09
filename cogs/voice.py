@@ -21,6 +21,19 @@ class Voice(commands.Cog):
         self.bot = bot
         self.temp_channels = {}
 
+    def get_user_room(self, member: discord.Member):
+        if not member.voice or not member.voice.channel:
+            return None, False
+
+        channel = member.voice.channel
+        g_id = str(member.guild.id)
+
+        if g_id in self.temp_channels and channel.id in self.temp_channels[g_id]:
+            owner_id = self.temp_channels[g_id][channel.id]
+            is_owner = (member.id == owner_id or member.guild_permissions.administrator)
+            return channel, is_owner
+        return None, False
+
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
         # 1. User Joined a "Join to Create" hub channel
@@ -82,103 +95,152 @@ class Voice(commands.Cog):
         embed = discord.Embed(
             title="✅ Join to Create Setup Complete!",
             description=f"Created category **🔊 TEMP VOICE ROOMS** and hub channel {j2c_channel.mention}!\n\n"
-                        f"**How it works:** When members join {j2c_channel.mention}, Ariya will automatically create a private temporary voice room for them and move them into it!",
+                        f"**Prefix Controls:** Use `.v limit`, `.v trust`, `.v reject`, `.v lock`, `.v unlock`, `.v name`, `.v kick`, `.v claim`!",
             color=discord.Color.green()
         )
         await interaction.followup.send(embed=embed)
 
-    # ==================== VOICE ROOM MANAGEMENT ====================
-    voice_group = app_commands.Group(name="voice", description="Manage your temporary voice channel 🔊")
+    # ==================== .v PREFIX COMMAND GROUP ====================
+    @commands.group(name="v", invoke_without_command=True)
+    async def v_group(self, ctx):
+        embed = discord.Embed(
+            title="🔊 Voice Room Commands (`.v`)",
+            description="Control your temporary voice room:\n\n"
+                        "`.v lock` — Lock your voice room\n"
+                        "`.v unlock` — Unlock your voice room\n"
+                        "`.v limit <number>` — Set user limit (0-99)\n"
+                        "`.v trust <@user>` — Trust/allow user into locked room\n"
+                        "`.v reject <@user>` — Ban user from your voice room\n"
+                        "`.v name <new_name>` — Rename your voice room\n"
+                        "`.v kick <@user>` — Disconnect user from room\n"
+                        "`.v claim` — Claim ownership if owner left",
+            color=discord.Color.purple()
+        )
+        await ctx.send(embed=embed)
 
-    @voice_group.command(name="name", description="Rename your temporary voice room")
-    @app_commands.describe(new_name="New name for your voice room")
-    async def voice_name(self, interaction: discord.Interaction, new_name: str):
-        if not interaction.user.voice or not interaction.user.voice.channel:
-            await interaction.response.send_message("❌ You are not in a voice channel!", ephemeral=True)
+    @v_group.command(name="lock")
+    async def v_lock(self, ctx):
+        channel, is_owner = self.get_user_room(ctx.author)
+        if not channel:
+            await ctx.send("❌ You are not in a temporary voice room!")
+            return
+        if not is_owner:
+            await ctx.send("❌ Only the room owner can lock this channel!")
             return
 
-        channel = interaction.user.voice.channel
-        g_id = str(interaction.guild_id)
+        await channel.set_permissions(ctx.guild.default_role, connect=False)
+        await ctx.send("🔒 Voice room **locked**!")
 
-        if g_id in self.temp_channels and channel.id in self.temp_channels[g_id]:
-            owner_id = self.temp_channels[g_id][channel.id]
-            if interaction.user.id != owner_id and not interaction.user.guild_permissions.administrator:
-                await interaction.response.send_message("❌ Only the room owner can rename this channel!", ephemeral=True)
-                return
-
-            await channel.edit(name=f"🔊 {new_name}")
-            await interaction.response.send_message(f"✅ Renamed room to **🔊 {new_name}**!")
-        else:
-            await interaction.response.send_message("❌ You are not in an active temporary voice room!", ephemeral=True)
-
-    @voice_group.command(name="lock", description="Lock your temporary voice room")
-    async def voice_lock(self, interaction: discord.Interaction):
-        if not interaction.user.voice or not interaction.user.voice.channel:
-            await interaction.response.send_message("❌ You are not in a voice channel!", ephemeral=True)
+    @v_group.command(name="unlock")
+    async def v_unlock(self, ctx):
+        channel, is_owner = self.get_user_room(ctx.author)
+        if not channel:
+            await ctx.send("❌ You are not in a temporary voice room!")
+            return
+        if not is_owner:
+            await ctx.send("❌ Only the room owner can unlock this channel!")
             return
 
-        channel = interaction.user.voice.channel
-        g_id = str(interaction.guild_id)
+        await channel.set_permissions(ctx.guild.default_role, connect=True)
+        await ctx.send("🔓 Voice room **unlocked**!")
 
-        if g_id in self.temp_channels and channel.id in self.temp_channels[g_id]:
-            owner_id = self.temp_channels[g_id][channel.id]
-            if interaction.user.id != owner_id and not interaction.user.guild_permissions.administrator:
-                await interaction.response.send_message("❌ Only the room owner can lock this channel!", ephemeral=True)
-                return
-
-            await channel.set_permissions(interaction.guild.default_role, connect=False)
-            await interaction.response.send_message("🔒 Your voice room is now **locked**!")
-        else:
-            await interaction.response.send_message("❌ You are not in an active temporary voice room!", ephemeral=True)
-
-    @voice_group.command(name="unlock", description="Unlock your temporary voice room")
-    async def voice_unlock(self, interaction: discord.Interaction):
-        if not interaction.user.voice or not interaction.user.voice.channel:
-            await interaction.response.send_message("❌ You are not in a voice channel!", ephemeral=True)
+    @v_group.command(name="limit")
+    async def v_limit(self, ctx, limit: int):
+        channel, is_owner = self.get_user_room(ctx.author)
+        if not channel:
+            await ctx.send("❌ You are not in a temporary voice room!")
             return
-
-        channel = interaction.user.voice.channel
-        g_id = str(interaction.guild_id)
-
-        if g_id in self.temp_channels and channel.id in self.temp_channels[g_id]:
-            owner_id = self.temp_channels[g_id][channel.id]
-            if interaction.user.id != owner_id and not interaction.user.guild_permissions.administrator:
-                await interaction.response.send_message("❌ Only the room owner can unlock this channel!", ephemeral=True)
-                return
-
-            await channel.set_permissions(interaction.guild.default_role, connect=True)
-            await interaction.response.send_message("🔓 Your voice room is now **unlocked**!")
-        else:
-            await interaction.response.send_message("❌ You are not in an active temporary voice room!", ephemeral=True)
-
-    @voice_group.command(name="limit", description="Set user limit for your temporary voice room")
-    @app_commands.describe(limit="User limit (0 to 99)")
-    async def voice_limit(self, interaction: discord.Interaction, limit: int):
-        if not interaction.user.voice or not interaction.user.voice.channel:
-            await interaction.response.send_message("❌ You are not in a voice channel!", ephemeral=True)
+        if not is_owner:
+            await ctx.send("❌ Only the room owner can set the limit!")
             return
 
         if limit < 0 or limit > 99:
-            await interaction.response.send_message("❌ Limit must be between 0 and 99!", ephemeral=True)
+            await ctx.send("❌ Limit must be between 0 and 99!")
             return
 
-        channel = interaction.user.voice.channel
-        g_id = str(interaction.guild_id)
+        await channel.edit(user_limit=limit)
+        limit_text = "unlimited" if limit == 0 else f"{limit} members"
+        await ctx.send(f"👥 Set room limit to **{limit_text}**!")
+
+    @v_group.command(name="trust")
+    async def v_trust(self, ctx, member: discord.Member):
+        channel, is_owner = self.get_user_room(ctx.author)
+        if not channel:
+            await ctx.send("❌ You are not in a temporary voice room!")
+            return
+        if not is_owner:
+            await ctx.send("❌ Only the room owner can trust users!")
+            return
+
+        await channel.set_permissions(member, connect=True)
+        await ctx.send(f"✅ Trusted {member.mention}! They can join even if room is locked.")
+
+    @v_group.command(name="reject")
+    async def v_reject(self, ctx, member: discord.Member):
+        channel, is_owner = self.get_user_room(ctx.author)
+        if not channel:
+            await ctx.send("❌ You are not in a temporary voice room!")
+            return
+        if not is_owner:
+            await ctx.send("❌ Only the room owner can reject users!")
+            return
+
+        await channel.set_permissions(member, connect=False)
+        if member.voice and member.voice.channel == channel:
+            await member.move_to(None)
+        await ctx.send(f"🚫 Rejected {member.mention} from your voice room!")
+
+    @v_group.command(name="name")
+    async def v_name(self, ctx, *, new_name: str):
+        channel, is_owner = self.get_user_room(ctx.author)
+        if not channel:
+            await ctx.send("❌ You are not in a temporary voice room!")
+            return
+        if not is_owner:
+            await ctx.send("❌ Only the room owner can rename the channel!")
+            return
+
+        await channel.edit(name=f"🔊 {new_name}")
+        await ctx.send(f"✅ Renamed voice room to **🔊 {new_name}**!")
+
+    @v_group.command(name="kick")
+    async def v_kick(self, ctx, member: discord.Member):
+        channel, is_owner = self.get_user_room(ctx.author)
+        if not channel:
+            await ctx.send("❌ You are not in a temporary voice room!")
+            return
+        if not is_owner:
+            await ctx.send("❌ Only the room owner can kick users!")
+            return
+
+        if member.voice and member.voice.channel == channel:
+            await member.move_to(None)
+            await ctx.send(f"👢 Kicked {member.mention} from your voice room!")
+        else:
+            await ctx.send("❌ User is not in your voice room!")
+
+    @v_group.command(name="claim")
+    async def v_claim(self, ctx):
+        if not ctx.author.voice or not ctx.author.voice.channel:
+            await ctx.send("❌ You are not in a voice channel!")
+            return
+
+        channel = ctx.author.voice.channel
+        g_id = str(ctx.guild.id)
 
         if g_id in self.temp_channels and channel.id in self.temp_channels[g_id]:
             owner_id = self.temp_channels[g_id][channel.id]
-            if interaction.user.id != owner_id and not interaction.user.guild_permissions.administrator:
-                await interaction.response.send_message("❌ Only the room owner can change the user limit!", ephemeral=True)
+            owner = ctx.guild.get_member(owner_id)
+
+            if owner and owner in channel.members and owner.id != ctx.author.id:
+                await ctx.send("❌ The room owner is still in this channel!")
                 return
 
-            await channel.edit(user_limit=limit)
-            limit_text = "unlimited" if limit == 0 else f"{limit} members"
-            await interaction.response.send_message(f"👥 Set room limit to **{limit_text}**!")
+            self.temp_channels[g_id][channel.id] = ctx.author.id
+            await ctx.send(f"👑 {ctx.author.mention} is now the owner of this voice room!")
         else:
-            await interaction.response.send_message("❌ You are not in an active temporary voice room!", ephemeral=True)
+            await ctx.send("❌ You are not in a temporary voice room!")
 
 
 async def setup(bot):
-    cog = Voice(bot)
-    bot.tree.add_command(cog.voice_group)
-    await bot.add_cog(cog)
+    await bot.add_cog(Voice(bot))
