@@ -20,6 +20,11 @@ class Help(commands.Cog):
             inline=False
         )
         embed.add_field(
+            name="🛡️ Anti-Nuke Security",
+            value="`/antinuke status` `/antinuke toggle` `/antinuke whitelist_add` `/antinuke whitelist_remove`",
+            inline=False
+        )
+        embed.add_field(
             name="🎵 Music",
             value="`/play` `/pause` `/resume` `/skip` `/stop` `/queue` `/leave`",
             inline=False
@@ -36,7 +41,7 @@ class Help(commands.Cog):
         )
         embed.add_field(
             name="🛠️ Utility",
-            value="`/schedule` `/newspaper` `/summarize` `/poll` `/give` `/userinfo` `/serverinfo`",
+            value="`/schedule` `/newspaper` `/summarize` `/poll` `/give` `/userinfo` `/serverinfo` `/botinfo` `/ping` `/invite` `/setup_server`",
             inline=False
         )
         embed.add_field(
