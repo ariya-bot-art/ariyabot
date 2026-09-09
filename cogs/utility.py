@@ -251,7 +251,57 @@ Conversation:
         embed.add_field(name="Roles", value=len(guild.roles), inline=True)
         embed.add_field(name="Created", value=guild.created_at.strftime("%B %d, %Y"), inline=True)
         embed.add_field(name="Boost Level", value=f"Level {guild.premium_tier}", inline=True)
+    # ==================== PING & BOT STATUS ====================
+    @app_commands.command(name="ping", description="Check Ariya's latency and system health 📡")
+    async def ping(self, interaction: discord.Interaction):
+        latency = round(self.bot.latency * 1000)
+        embed = discord.Embed(
+            title="🏓 Pong!",
+            description=f"**Latency:** `{latency}ms`\n**Status:** `🟢 Operational 24/7`",
+            color=discord.Color.green() if latency < 150 else discord.Color.orange()
+        )
         await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(name="botinfo", description="View Ariya's official statistics & system status 🤖")
+    async def botinfo(self, interaction: discord.Interaction):
+        latency = round(self.bot.latency * 1000)
+        total_members = sum(g.member_count for g in self.bot.guilds if g.member_count)
+        
+        embed = discord.Embed(
+            title="🤖 Ariya — Bot Overview & Stats",
+            description="Your all-in-one AI companion powered by Google Gemini!",
+            color=discord.Color.purple()
+        )
+        if self.bot.user and self.bot.user.display_avatar:
+            embed.set_thumbnail(url=self.bot.user.display_avatar.url)
+
+        embed.add_field(name="🌐 Servers", value=f"`{len(self.bot.guilds)}`", inline=True)
+        embed.add_field(name="👥 Total Users", value=f"`{total_members}`", inline=True)
+        embed.add_field(name="📡 Latency", value=f"`{latency}ms`", inline=True)
+        embed.add_field(name="🧠 AI Model", value="`Gemini 2.5 Flash`", inline=True)
+        embed.add_field(name="⚡ Hosting", value="`Railway 24/7 Cloud`", inline=True)
+        embed.add_field(name="🐍 Python", value="`v3.13`", inline=True)
+        
+        embed.set_footer(text="Ariya Discord Bot • Official Build")
+        await interaction.response.send_message(embed=embed)
+
+    # ==================== INVITE ====================
+    @app_commands.command(name="invite", description="Get Ariya's official invite link! 🔗")
+    async def invite(self, interaction: discord.Interaction):
+        invite_url = f"https://discord.com/api/oauth2/authorize?client_id={self.bot.user.id}&permissions=8&scope=bot%20applications.commands"
+        
+        embed = discord.Embed(
+            title="✨ Invite Ariya to Your Server!",
+            description="Bring Gemini AI, Music, Daily Challenges, Economy & Moderation to your community today!",
+            color=discord.Color.gold()
+        )
+        if self.bot.user and self.bot.user.display_avatar:
+            embed.set_thumbnail(url=self.bot.user.display_avatar.url)
+
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(label="Add Ariya to Server 🤖", url=invite_url, style=discord.ButtonStyle.link))
+        
+        await interaction.response.send_message(embed=embed, view=view)
 
 
 async def setup(bot):
