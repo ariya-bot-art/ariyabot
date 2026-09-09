@@ -20,13 +20,13 @@ class Help(commands.Cog):
             inline=False
         )
         embed.add_field(
-            name="🔊 Temp Voice Rooms (Join to Create)",
-            value="`/setup_j2c` `/voice name` `/voice lock` `/voice unlock` `/voice limit`",
+            name="🛡️ Verification & Security",
+            value="`/setup_verify` `/verify` `.verify` `/antinuke status` `/antinuke toggle` `/antinuke whitelist_add` `/antinuke whitelist_remove`",
             inline=False
         )
         embed.add_field(
-            name="🛡️ Anti-Nuke Security",
-            value="`/antinuke status` `/antinuke toggle` `/antinuke whitelist_add` `/antinuke whitelist_remove`",
+            name="🔊 Temp Voice Rooms (Join to Create)",
+            value="`/setup_j2c` `.v lock` `.v unlock` `.v limit` `.v trust` `.v reject` `.v name` `.v kick` `.v claim`",
             inline=False
         )
         embed.add_field(
