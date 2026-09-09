@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy — Ariya Discord Bot</title>
+    <style>
+        :root {
+            --bg: #0b0f19;
+            --card-bg: rgba(23, 31, 51, 0.7);
+            --border: rgba(139, 92, 246, 0.2);
+            --primary: #8b5cf6;
+            --primary-glow: rgba(139, 92, 246, 0.4);
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 30px var(--primary-glow);
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 2.2rem;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .badge {
+            font-size: 0.85rem;
+            background: var(--primary);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.3rem;
+            margin-top: 28px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        p, li {
+            line-height: 1.7;
+            color: var(--text-dim);
+            font-size: 1rem;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ Ariya Bot <span class="badge">Privacy Policy</span></h1>
+        <p><em>Effective Date: September 9, 2026</em></p>
+
+        <p>Ariya ("the Bot") is committed to protecting user privacy. This Privacy Policy outlines what data is collected, how it is stored, and your rights regarding your data.</p>
+
+        <h2>1. Data We Collect & Store</h2>
+        <ul>
+            <li><strong>User & Guild Identifiers:</strong> Discord User IDs and Server (Guild) IDs to bind data to users and servers.</li>
+            <li><strong>Economy Data:</strong> User coin balances (used for <code>/balance</code> and <code>/give</code>).</li>
+            <li><strong>Moderation History:</strong> Warning records, kick/ban logs, and infraction history (used for <code>/warn</code>).</li>
+            <li><strong>Challenge Data:</strong> Challenge completion status and leaderboard standings (used for <code>/challenge</code>).</li>
+            <li><strong>Voice Channel Data:</strong> Channel configurations created via Join to Create (used for <code>.v</code> commands).</li>
+            <li><strong>AI Conversation Context:</strong> Temporary chat history used by <code>/chat</code> to maintain memory across interactions.</li>
+        </ul>
+
+        <h2>2. How Data Is Used</h2>
+        <ul>
+            <li>To maintain user balances, leaderboards, moderation history, and voice channel controls.</li>
+            <li>To provide context-aware AI responses using the Google Gemini AI API.</li>
+            <li>Data is <strong>never sold</strong>, rented, or shared with third parties for marketing purposes.</li>
+        </ul>
+
+        <h2>3. Third-Party Data Processing</h2>
+        <p>AI features (<code>/chat</code>, <code>/vibe</code>, <code>/summarize</code>, <code>/newspaper</code>) send text prompts to the Google Gemini API for natural language processing. No personal identifiers (like usernames or raw user IDs) are attached to external API prompts.</p>
+
+        <h2>4. Data Retention & Deletion</h2>
+        <ul>
+            <li>Data is stored securely until requested for deletion or until Ariya is removed from a server for more than 30 days.</li>
+            <li>Users can request complete data deletion at any time by joining our Support Server or contacting the bot owner.</li>
+        </ul>
+
+        <div class="footer">
+            <p>Ariya Discord Bot • <a href="terms.html">Terms of Service</a></p>
+        </div>
+    </div>
+</body>
+</html>
