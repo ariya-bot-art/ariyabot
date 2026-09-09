@@ -41,8 +41,12 @@ async def sync(ctx):
     await ctx.send(f"✅ Synced {len(synced)} slash commands globally!")
 
 async def main():
+    token = os.getenv("DISCORD_TOKEN")
+    if not token:
+        print("❌ ERROR: DISCORD_TOKEN is missing from environment variables!", flush=True)
+        return
     async with bot:
-        await bot.start(os.getenv("DISCORD_TOKEN"))
+        await bot.start(token)
 
 if __name__ == "__main__":
     asyncio.run(main())
